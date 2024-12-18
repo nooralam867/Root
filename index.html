@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Root Of Any Equations</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    input, button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 90%;
+    }
+    #output {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Find Root Of Any Equations</h1>
+  <label for="equationInput">Enter the equation (e.g., <code>f(x)=0</code>):</label>
+  <input type="text" id="equationInput" placeholder="Example: 10^x-5=0, x^2-2=0, x^x-5=0" />
+
+  <label for="pValue">Enter the number of digits after the decimal:</label>
+  <input type="number" id="pValue" min="1" placeholder="Enter value" />
+
+  <button onclick="calculate()">Start</button>
+  <div id="output"></div>
+
+  <script>
+    function calculate() {
+      const equation = document.getElementById('equationInput').value;
+      const p = parseInt(document.getElementById('pValue').value);
+
+      if (!equation.includes('=')) {
+        document.getElementById('output').innerHTML = "Please enter a valid equation in the form 'expression=constant'.";
+        return;
+      }
+
+      if (isNaN(p) || p < 1) {
+        document.getElementById('output').innerHTML = "Please enter a valid number for p (p >= 1).";
+        return;
+      }
+
+      // Parse the equation
+      const [left, right] = equation.split('=').map(s => s.trim());
+
+      if (!left || isNaN(parseFloat(right))) {
+        document.getElementById('output').innerHTML = "Invalid equation format. Make sure it's like '10^x=5'.";
+        return;
+      }
+
+      // Replace ^ with ** for JavaScript evaluation
+      const parsedFunction = left.replace(/\^/g, '**') + ` - (${right})`;
+
+      // Create the function dynamically
+      let f;
+      try {
+        f = new Function('x', `return ${parsedFunction};`);
+        // Test if the function works
+        f(0); // Testing if the function runs successfully
+      } catch (error) {
+        document.getElementById('output').innerHTML = "Invalid equation syntax. Please check your input.";
+        return;
+      }
+
+      // Implement the calculation logic
+      let t = 0; // Starting point
+      let y = 0;
+
+      for (let n = 0; n < p; n++) {
+        let x = t;
+
+        for (let i = 9; i >= 0; i--) {
+          y = x + i * Math.pow(10, -n);
+
+          if (f(y) < 0) break;
+        }
+
+        t = y;
+      }
+
+      document.getElementById('output').innerHTML = `Value of root f(x)=0 is x = <strong>${y.toFixed(p)}</strong>`;
+    }
+  </script>
+</body>
+</html>
